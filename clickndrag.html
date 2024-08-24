@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>You’re Probably Implementing Click and Drag Wrong</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">You’re Probably Implementing Click and Drag Wrong</h1>
+</header>
+<p>Any implementation of mouse-based interaction is basically a small
+state machine that parses events. There are more possible user inputs in
+more possible sequences than most people usually anticipate, though, and
+as everyone knows, writing correct stateful code is impossible.</p>
+<p>Let’s say you’re trying to get basic click-and-drag behavior. You
+have some kind of little widget or gadget in your webpage that you want
+the user to be able to drag around and have follow the mouse as it
+moves. The relevant events, obviously, are <code>mousedown</code>,
+<code>mousemove</code>, and <code>mouseup</code>.<a href="#fn1"
+class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> You
+might write something like this:</p>
+<iframe width="100%" height="525" src="//jsfiddle.net/gan5psb7/embedded/js,html,result/" allowfullscreen="allowfullscreen" frameborder="0">
+</iframe>
+<p>This example is bugged in a fairly obvious way. If you pick up the
+circle, try to leave the box it lives inside, and then let go, it will
+be stuck to the cursor when you mouse back over that box.<a href="#fn2"
+class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> No
+button is being held, but the state machine is still in the dragging
+state, because it has no transition that accounts for letting go of the
+mouse button anywhere besides inside the box. The most obvious fix is to
+register <code>mouseup</code> on <code>document</code> instead. It turns
+out that if you do this, the event will fire even when the mouse is
+outside of the window, so you can drag all the way to the titlebar
+before letting go, and it won’t stick to the cursor when you come
+back:</p>
+<iframe width="100%" height="525" src="//jsfiddle.net/moyct7vf/embedded/js,html,result/" allowfullscreen="allowfullscreen" frameborder="0">
+</iframe>
+<p>This is, as far as I can tell, approximately what many websites do,
+but it is still wrong, albeit in a much subtler and less frequently
+relevant way. I said <code>mouseup</code> fires on <code>document</code>
+even when the mouse is outside of the window, but this is actually only
+half true: It will fire if you press a button inside the window, move
+the cursor outside of the window, and then let go, leaving the window
+focused the entire time, but situations other than this one get much
+worse. This same process but changing which window has focus in the
+middle appears to give different results between browsers and platforms;
+Chromium on Linux<a href="#fn3" class="footnote-ref" id="fnref3"
+role="doc-noteref"><sup>3</sup></a> still fires an event for me, but
+Chrome on Windows and Firefox on either OS both seem to regard the
+cursor as a lost cause. Changing desktops or tabs while the mouse is
+held down also results in no <code>mouseup</code> event on
+<code>document</code> when I let go in either Firefox or Chrome on
+either Linux or Windows.</p>
+<p>This means you can still get a sticky circle in the “fixed” version
+above with a little more effort. Simply pick the circle up, press
+ctrl+tab, let go, and come back. Or if you prefer, try it on your
+favorite website with click-and-drag functionality! I’ve found that
+Desmos, Proton calendar, and <a href="https://q.uiver.app/">quiver</a>
+(which is regardless great and you should check out) are broken in this
+way. Gmail is broken in Firefox but not Chrome for reasons completely
+beyond me that have probably nothing to do with the fixes I propose
+below. Google Drive is mostly non-broken; if you pick up a file, tab
+out, let go, <em>leave your mouse outside of the window</em>, and come
+back, the file will be left floating until you mouse back over the
+document, but the drag will end once you do.</p>
+<p>So how to make the circle no longer sticky? One imperfect possibility
+would be to add an additional <code>blur</code> event handler on
+<code>window</code>. The <code>blur</code> event will fire when the
+window loses focus. If we end any drags in progress when this event
+fires, we should get a safe underapproximation of the true mouse state:
+If the button is lifted without the window ever losing focus,
+<code>mouseup</code> will fire on <code>document</code>, and if the
+window loses focus, <code>blur</code> will fire on
+<code>window</code>.<a href="#fn4" class="footnote-ref" id="fnref4"
+role="doc-noteref"><sup>4</sup></a> Here’s a version of the demo with
+the new handler:</p>
+<iframe width="100%" height="550" src="//jsfiddle.net/n0pw8odr/embedded/js,html,result/" allowfullscreen="allowfullscreen" frameborder="0">
+</iframe>
+<p>This still isn’t perfect, though. It’s sort of unexpected that
+alt-tabbing to a non-overlapping window will cause a drag to abruptly
+end, for example, and it would make sense that if you never let go of
+the mouse while tabbing out and back, then a drag should continue when
+you return. An alternative which would fix these issues and which I
+imagine is roughly what Google Drive does would be to treat every
+<code>mousemove</code> event as an extra opportunity to check for an
+absence of depressed mouse buttons:</p>
+<iframe width="100%" height="600" src="//jsfiddle.net/bLpoes68/embedded/js,html,result/" allowfullscreen="allowfullscreen" frameborder="0">
+</iframe>
+<p>This still isn’t quite as perfect as Gmail in Chrome. I have no idea
+what they’re doing, though!</p>
+<aside id="footnotes" class="footnotes footnotes-end-of-document"
+role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1"><p>There is an <a
+href="https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API">HTML
+Drag and Drop API</a>, but it’s intended more for integration with the
+native OS idioms of dragging and dropping than for continuous movement
+of objects around within within your app—for example, it will by default
+automatically create an afterimage of the dragged object that follows
+the user’s cursor which can leave the window and whose movement you
+cannot programmatically manage.<a href="#fnref1" class="footnote-back"
+role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>There might also be bugs involving coordinate systems
+and/or pixel sizes for all I know. UI code is hard and this post is only
+about the state machine aspect of it (and, really, one particular
+instance of that).<a href="#fnref2" class="footnote-back"
+role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>I use Arch btw. Probably more saliently, I use i3 as my
+window manager.<a href="#fnref3" class="footnote-back"
+role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>I bet I’ve let something slip through the gaps here and
+I hope someone tells me another corner case I’ve missed.<a
+href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</aside>
+</body>
+</html>
