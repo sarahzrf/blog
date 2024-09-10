@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Locus Solum for PLists</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+  </style>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"
+  type="text/javascript"></script>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Locus Solum for PLists</h1>
+</header>
+<p><em>Locus Solum</em> is a famously impenetrable “paper” by Girard. I
+have been trying to work through his treatment of some of the same
+material it covers in <em>The Blind Spot</em>, and I want to translate
+what I think I have gleaned from doing so into a more PL-style
+presentation, both to solidify my own understanding and on the off
+chance that it might make Girard’s nonsense slightly more comprehensible
+to other practitioners of PL.</p>
+<p>I’ve only read partway into his presentation and then skimmed through
+a bit of the rest, but I would describe what I have seen as being
+<em>sort of like</em> as defining a mostly-untyped language and then
+doing realizability with it. Certainly none of these terms are ones that
+Girard is unfamiliar with—indeed, they are the subject of exposition and
+discussion earlier in <em>The Blind Spot</em>—so Girard would probably
+have some high-minded objection to this characterization. I think it
+gives some of the right idea, though.</p>
+<p>The “programs” or “realizers” that Girard works with are called
+“designs”; he formalizes the idea of “design” in two ways,
+<em>dessins</em> and <em>desseins</em>. <em>Dessins</em> are a bit more
+syntactic in form and could be mistaken for something like programs,
+although they are coinductive, not inductive, and they are
+infinitely-branching. A <em>dessein</em> contains the same operational
+information as a <em>dessin</em> but has been somewhat extensionalized,
+essentially such that “observational equivalence is equality” holds.</p>
+<p>I will now present a “PL” along with a “type system” for that PL such
+that Girard’s <em>dessins</em> correspond to my typing derivations and
+his <em>desseins</em> correspond to terms that they type (I think; I
+haven’t checked these correspondences super carefully). I put “PL” in
+quotes because everything involved will be, as mentioned, infinitary and
+coinductive, and hence not really very syntactic. I put “type system” in
+quotes because the judgments we write down will not be assigning types
+in anything resembling a usual sense, will track very meager information
+about terms, and will ensure good operational behavior only to a
+somewhat limited extent.</p>
+<p>A “term” of this “PL” will be somewhere between “literal with the
+memory address of each subterm annotated” and “process that sends and
+recvs along channels”. The role of memory addresses / channel
+identifiers will be played simply by finite sequences of natural
+numbers, which we will refer to as <em>locations</em> or <em>loci</em>
+and understand as hierarchically structured, as though they are indexing
+into an infinitely-branching tree—for example, <span
+class="math inline">\(\langle 3, 7, 2 \rangle\)</span> is an immediate
+sublocus of <span class="math inline">\(\langle 3, 7 \rangle\)</span>.
+The variables <span class="math inline">\(\xi, \sigma, \tau,
+\nu\)</span> will range over loci. The variables <span
+class="math inline">\(I, J, K\)</span> will range over finite sets of
+natural numbers, and <span class="math inline">\(\mathcal N\)</span>
+will range over arbitrary sets of finite sets of natural numbers.</p>
+<p>We define “positive literals” <span class="math inline">\(p,
+q\)</span> and “negative literals” <span class="math inline">\(n,
+m\)</span> by coinduction:</p>
+<p><span class="math display">\[p, q \mathrel{::=} ✠ \mid
+\operatorname{\mathsf{put}}(\xi, I, (n_{i \in I}))\]</span> <span
+class="math display">\[n, m \mathrel{::=}
+\operatorname{\mathsf{get}}(\xi, \mathcal N, (p_{I \in \mathcal
+N}))\]</span></p>
+<p>Our “typing judgments” will be of the forms <span
+class="math inline">\(\vdash p : \Lambda\)</span> and <span
+class="math inline">\(\vdash n : \xi \multimap \Lambda\)</span>, where
+<span class="math inline">\(\Lambda\)</span> ranges over finite sets of
+loci (we will also use <span class="math inline">\(\Sigma\)</span> for
+such things). Coinductively, we set:</p>
+<p><span class="math display">\[\frac{}{\vdash ✠ : \Lambda}\]</span>
+<span class="math display">\[\frac{\left( \vdash n_i : \xi i \multimap
+\Lambda_i \right)_i}{\vdash \operatorname{\mathsf{put}}(\xi, I, (n_{i
+\in I})) : \Lambda} ~ (*)\]</span> <span
+class="math display">\[\frac{\left( \vdash p_I : \Lambda_I, \xi I
+\right)_I}{\vdash \operatorname{\mathsf{get}}(\xi, \mathcal N, (p_{I \in
+\mathcal N})) : \xi \multimap \Lambda} ~ (**)\]</span></p>
+<p><span class="math inline">\((*)\)</span> The (finitely many) <span
+class="math inline">\(\Lambda_i\)</span> must be disjoint and must all
+be subsets of <span class="math inline">\(\Lambda\)</span>. Notably,
+they need not have union <span
+class="math inline">\(\Lambda\)</span>.<br />
+<span class="math inline">\((**)\)</span> The (generally infinitely
+many) <span class="math inline">\(\Lambda_I\)</span> must all be subsets
+of <span class="math inline">\(\Lambda\)</span>. Notably, they need not
+<em>equal</em> <span class="math inline">\(\Lambda\)</span>.</p>
+<p>This “type system” allows <em>weakening</em>, due to the notable bits
+in the <span class="math inline">\((*)\)</span> and <span
+class="math inline">\((**)\)</span> restrictions.</p>
+<p>At this point things start to get worse. Reduction as Girard
+<em>pretty informally</em> presents it is essentially a
+coinductively-presented big-step relation taking a “net” of literals to
+a single literal. A net of literals is simply a finite set satisfying
+some well-formedness properties, but giving those well-formedness
+properties using a “typing rule”-looking formulation is kind of awkward.
+In particular, any given locus may occur at most twice among the “types”
+assigned to the literals of the net, but at the same time, a locus that
+does occur twice vanishes from the result type, which creates an
+annoying situation of not wanting to keep the locus around (since it
+isn’t in the result type) but needing to (since it isn’t allowed to
+occur in the types of future literals to be considered for inclusion in
+the net).</p>
+<p>The reduction relation is also surprisingly awkward to present.
+Girard’s version performs several “take the connected component”
+operations that seem frankly miserable to try to transcribe into my
+notation; in fact I am not even sure they are possible to perform
+without “keeping types around at runtime”. I have some ideas for
+alternative formulations that probably get equivalent results, but that
+is getting far enough afield that I am sort of comfortable saying that
+maybe designs are, in fact, not really a PL.</p>
+</body>
+</html>
