@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Maybe is a Comonad in OCaml and I Only Partially Understand Why</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"
+  type="text/javascript"></script>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title"><code>Maybe</code> is a Comonad in OCaml and I Only
+Partially Understand Why</h1>
+</header>
+<p>Some years ago, for the bit, I wrote <a
+href="https://gist.github.com/sarahzrf/388f7eb660753382ed2dfe86f7b55505">a
+scrap of Template Haskell</a> that let you write effectful code using
+Haskell syntax. You could write, say,</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">$</span>(effectful [<span class="op">|</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">let</span> map&#39; <span class="ot">=</span> \f xs <span class="ot">-&gt;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>        <span class="kw">case</span> xs <span class="kw">of</span> [] <span class="ot">-&gt;</span> []; x<span class="op">:</span>xs&#39; <span class="ot">-&gt;</span> f x <span class="op">:</span> map&#39; f xs&#39;</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">in</span> map&#39; <span class="fu">putStrLn</span> [<span class="st">&quot;hello&quot;</span>, <span class="st">&quot;world&quot;</span>]</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="op">|</span>])</span></code></pre></div>
+<p>and this would have type <code>IO [()]</code>. Essentially, I did
+something like the idiom bracket translation except that I handled more
+syntactic constructs (with varying success). My translation left free
+variables alone,<a href="#fn1" class="footnote-ref" id="fnref1"
+role="doc-noteref"><sup>1</sup></a> so as seen above, you could use
+existing Haskell functions of type <code>A -&gt; M B</code> as though
+they had type <code>A -&gt; B</code> in your effectful fragments—at a
+Haskeller’s bullshit level of category-theoretic rigor, “the
+untranslated snippets are working in the Kleisli category, so Kleisli
+arrows appear to be ordinary arrows”.</p>
+<p>While playing around with this translation, I realized that the
+existing Haskell <code>id</code> function appears to have the type
+<code>M a -&gt; a</code> when used inside effectful fragments—the type
+signature of <code>extract</code>. Continuing to tenuously relate what
+is going on here to category theory, this corresponds to the fact that
+“monads become comonads on their Kleisli categories”. In more detail:
+Suppose <span class="math inline">\(T\)</span> is a monad on <span
+class="math inline">\(\mathsf C\)</span>. Then there is <a
+href="https://ncatlab.org/nlab/show/Kleisli+category#adjunction">an
+adjunction</a> <span class="math inline">\(F \dashv U\)</span> with
+<span class="math inline">\(F : \mathsf C \to \mathsf C_T\)</span> and
+<span class="math inline">\(U : \mathsf C_T \to \mathsf C\)</span> whose
+monad is <span class="math inline">\(T\)</span>.<a href="#fn2"
+class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> The
+left adjoint <span class="math inline">\(F\)</span> is the identity on
+objects and the right adjoint <span class="math inline">\(U\)</span> is
+<span class="math inline">\(T\)</span> on objects. Hence, the
+<em>comonad</em> <span class="math inline">\(F \circ U : \mathsf C_T \to
+\mathsf C_T\)</span> of the adjunction is just <span
+class="math inline">\(T\)</span> on objects (although its behavior on
+morphisms is a bit different from <span
+class="math inline">\(T\)</span>’s)—“<span
+class="math inline">\(T\)</span> is a comonad on <span
+class="math inline">\(\mathsf C_T\)</span>” (sort of). The <span
+class="math inline">\(\varepsilon_A\)</span> of this comonad is given by
+<span class="math inline">\(\mathsf{id}_A\)</span> in <span
+class="math inline">\(\mathsf C\)</span>; this corresponds to the
+“<code>id</code> becomes some kind of <code>extract</code>” that I
+saw.</p>
+<p>If we keep following this handwavy application of category theory, we
+arrive at the following: OCaml, say, is a language with exceptions. We
+can thus (considering only one kind of exception) think of it as “what
+the Kleisli category of the <code>Maybe</code> monad looks like from the
+inside”. Therefore <code>Maybe</code> “becomes a comonad on it” (albeit
+one named <code>option</code> instead), as above, and we can try to
+derive some OCaml code for comonad operations by following the
+category-theoretic story.</p>
+<p>And I did this, and it worked! It looks like this:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">exception</span> Empty</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> option_fmap (f : &#39;a -&gt; &#39;b) (x : &#39;a <span class="dt">option</span>) : &#39;b <span class="dt">option</span> =</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">match</span> x <span class="kw">with</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  | <span class="dt">None</span> -&gt; <span class="dt">None</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  | <span class="dt">Some</span> a -&gt; <span class="kw">try</span> <span class="dt">Some</span> (f a) <span class="kw">with</span> Empty -&gt; <span class="dt">None</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> option_extract (x : &#39;a <span class="dt">option</span>) : &#39;a =</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="kw">match</span> x <span class="kw">with</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  | <span class="dt">None</span> -&gt; <span class="dt">raise</span> Empty</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  | <span class="dt">Some</span> a -&gt; a</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> option_duplicate (x : &#39;a <span class="dt">option</span>) : &#39;a <span class="dt">option</span> <span class="dt">option</span> = <span class="dt">Some</span> x</span></code></pre></div>
+<p>Note the nonstandard <code>fmap</code>—the usual one does
+<em>not</em> give a comonad with this <code>extract</code> and
+<code>duplicate</code>.</p>
+<p>The problem is, I can’t give a principled derivation of this code. To
+write it, I worked on a basis something like “treat Haskell like it has
+semantics in some hypothetical Set-like category; then give OCaml
+semantics in a Kleisli category over that category (ignoring all of the
+other additional language features besides exceptions) and try to
+transcribe back into OCaml some functions whose semantics are the data
+of the previously-discussed comonad on the Kleisli category”.<a
+href="#fn3" class="footnote-ref" id="fnref3"
+role="doc-noteref"><sup>3</sup></a> But there are a lot of things that
+are pretty blatantly wrong if you try to make this at all precise, even
+if we restricted focus to some idealized toy languages instead of
+Haskell and/or OCaml. Say we had a categorical semantics for such a
+language with exceptions; then definitions like the ones written above
+would give rise to constructions <em>inside</em> the category, not ones
+that operate <em>on</em> it—most notably, the <code>f</code> argument to
+<code>option_fmap</code> would range in an internal sense over some kind
+of internal hom, not in an external sense over morphisms of the category
+(of course these are related, but they are not the same!). And more
+importantly, in general there is no reason to expect that just because
+some object exists in the semantics, it should come from a definition in
+the original language.</p>
+<p>Really, I don’t even know how to get as far as having these problems!
+I’m very unfamiliar with the technical details of connections between
+effectful languages and category theory, and I don’t know how to
+actually give a language with <code>try</code> semantics in a Kleisli
+category like this. I tried going back and checking out <a
+href="https://www.sciencedirect.com/science/article/pii/0890540191900524">Moggi’s
+original paper</a> about interpreting effectful languages in Kleisli
+categories, but it doesn’t apply to this case.</p>
+<p>I do have a dim sense of how some of this stuff can be resolved. In
+particular, I think the universality properties of syntactic categories
+basically resolve some of the issues I complain about above. I just
+don’t actually know how to actually construct a syntactic category for
+an effectful language and use such a thing to understand my informal
+process of deriving the code above.</p>
+<section id="footnotes" class="footnotes footnotes-end-of-document"
+role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1"><p>Except for constructors, which I special cased so that
+they would act “as expected”.<a href="#fnref1" class="footnote-back"
+role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>Indeed, it is the initial adjunction with monad <span
+class="math inline">\(T\)</span>.<a href="#fnref2" class="footnote-back"
+role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>Well, I’m not completely certain on this as far as
+historical accuracy of my thought process, since I wrote this code five
+years ago and I only have IRC logs to go off of to remind myself what I
+was thinking at the time. But that’s not really what this post is
+about.<a href="#fnref3" class="footnote-back"
+role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
+</body>
+</html>
